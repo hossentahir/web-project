@@ -1,82 +1,50 @@
-let editingIndex = null;
+const API_BASE = "http://localhost:5000";
 
-window.onload = function () {
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  tasks.forEach((task, index) => showTask(task, index));
+window.onload = () => {
+  loadTasks();
 };
 
-function addTask() {
-  const taskInput = document.getElementById("taskInput");
-  const taskText = taskInput.value.trim();
-  if (taskText === "") return;
+async function loadTasks() {
+  const res = await fetch(`${API_BASE}/tasks`);
+  const tasks = await res.json();
 
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  tasks.push(taskText);
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-
-  showAllTasks();
-  taskInput.value = "";
-}
-
-function deleteTask(index) {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  tasks.splice(index, 1);
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  showAllTasks();
-}
-
-function editTask(index) {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  const taskInput = document.getElementById("taskInput");
-  taskInput.value = tasks[index];
-  editingIndex = index;
-
-  document.getElementById("addBtn").style.display = "none";
-  document.getElementById("updateBtn").style.display = "inline";
-}
-
-function updateTask() {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  const taskInput = document.getElementById("taskInput");
-  const updatedText = taskInput.value.trim();
-  if (updatedText === "") return;
-
-  tasks[editingIndex] = updatedText;
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-
-  showAllTasks();
-  taskInput.value = "";
-  editingIndex = null;
-
-  document.getElementById("addBtn").style.display = "inline";
-  document.getElementById("updateBtn").style.display = "none";
-}
-
-function showAllTasks() {
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
   const taskList = document.getElementById("taskList");
   taskList.innerHTML = "";
 
-  tasks.forEach((task, index) => showTask(task, index));
+  tasks.forEach(task => {
+    const li = document.createElement("li");
+    li.innerText = task.text;
+
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "❌";
+    delBtn.onclick = () => deleteTask(task.id);
+
+    li.appendChild(delBtn);
+    taskList.appendChild(li);
+  });
 }
 
-function showTask(taskText, index) {
-  const taskList = document.getElementById("taskList");
+async function addTask() {
+  const input = document.getElementById("taskInput");
+  const text = input.value.trim();
+  if (text === "") return;
 
-  const li = document.createElement("li");
-  li.innerText = taskText;
+  await fetch(`${API_BASE}/tasks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ text })
+  });
 
-  const delBtn = document.createElement("button");
-  delBtn.innerText = "❌";
-  delBtn.style.marginLeft = "10px";
-  delBtn.onclick = () => deleteTask(index);
+  input.value = "";
+  loadTasks();
+}
 
-  const editBtn = document.createElement("button");
-  editBtn.innerText = "✏️";
-  editBtn.style.marginLeft = "5px";
-  editBtn.onclick = () => editTask(index);
+async function deleteTask(id) {
+  await fetch(`${API_BASE}/tasks/${id}`, {
+    method: "DELETE"
+  });
 
-  li.appendChild(editBtn);
-  li.appendChild(delBtn);
-  taskList.appendChild(li);
+  loadTasks();
 }
