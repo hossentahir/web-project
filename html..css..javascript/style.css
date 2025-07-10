@@ -21,14 +21,14 @@ input {
 }
 
 button {
-  width: 100%;
-  padding: 8px;
-  background: teal;
+  width: auto;
+  padding: 5px 10px;
+  background: crimson;
   color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+  margin-left: 5px;
+  font-size: 12px;
 }
+
 
 ul {
   list-style: none;
