@@ -8,8 +8,11 @@
 <body>
   <div class="container">
     <h1>📝 My Tasks</h1>
+    <!-- input field and update button -->
     <input type="text" id="taskInput" placeholder="Enter a new task">
-    <button onclick="addTask()">Add Task</button>
+    <button onclick="addTask()" id="addBtn">Add Task</button>
+    <button onclick="updateTask()" id="updateBtn" style="display:none;">Update Task</button>
+
     <ul id="taskList"></ul>
   </div>
 

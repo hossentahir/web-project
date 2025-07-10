@@ -1,4 +1,5 @@
-// Load existing tasks on page load
+let editingIndex = null;
+
 window.onload = function () {
   const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
   tasks.forEach((task, index) => showTask(task, index));
@@ -13,8 +14,50 @@ function addTask() {
   tasks.push(taskText);
   localStorage.setItem("tasks", JSON.stringify(tasks));
 
-  showTask(taskText, tasks.length - 1);
+  showAllTasks();
   taskInput.value = "";
+}
+
+function deleteTask(index) {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  tasks.splice(index, 1);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  showAllTasks();
+}
+
+function editTask(index) {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  const taskInput = document.getElementById("taskInput");
+  taskInput.value = tasks[index];
+  editingIndex = index;
+
+  document.getElementById("addBtn").style.display = "none";
+  document.getElementById("updateBtn").style.display = "inline";
+}
+
+function updateTask() {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  const taskInput = document.getElementById("taskInput");
+  const updatedText = taskInput.value.trim();
+  if (updatedText === "") return;
+
+  tasks[editingIndex] = updatedText;
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  showAllTasks();
+  taskInput.value = "";
+  editingIndex = null;
+
+  document.getElementById("addBtn").style.display = "inline";
+  document.getElementById("updateBtn").style.display = "none";
+}
+
+function showAllTasks() {
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  const taskList = document.getElementById("taskList");
+  taskList.innerHTML = "";
+
+  tasks.forEach((task, index) => showTask(task, index));
 }
 
 function showTask(taskText, index) {
@@ -23,24 +66,17 @@ function showTask(taskText, index) {
   const li = document.createElement("li");
   li.innerText = taskText;
 
-  const btn = document.createElement("button");
-  btn.innerText = "❌";
-  btn.style.marginLeft = "10px";
-  btn.onclick = function () {
-    deleteTask(index);
-  };
+  const delBtn = document.createElement("button");
+  delBtn.innerText = "❌";
+  delBtn.style.marginLeft = "10px";
+  delBtn.onclick = () => deleteTask(index);
 
-  li.appendChild(btn);
+  const editBtn = document.createElement("button");
+  editBtn.innerText = "✏️";
+  editBtn.style.marginLeft = "5px";
+  editBtn.onclick = () => editTask(index);
+
+  li.appendChild(editBtn);
+  li.appendChild(delBtn);
   taskList.appendChild(li);
-}
-
-function deleteTask(index) {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-  tasks.splice(index, 1); // Remove item from array
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-
-  // Clear UI and reload all tasks
-  document.getElementById("taskList").innerHTML = "";
-  tasks.forEach((task, i) => showTask(task, i));
 }
